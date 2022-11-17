@@ -4,7 +4,7 @@ namespace muyomu\aop\advicetype;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class Hystrix
 {
     private string $HystrixClassName;

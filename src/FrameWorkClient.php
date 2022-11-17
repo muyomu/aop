@@ -49,7 +49,7 @@ class FrameWorkClient implements FrameWork
             }
             if(!empty($Hystrix)){
                 $advice = $Hystrix[0]->newInstance();
-                $adviceClass = $advice->getAdviceClassName();
+                $adviceClass = $advice->getHystrixClassName();
                 $adviceClass_class = new ReflectionClass($adviceClass);
                 $adviceClass_instance = $adviceClass_class->newInstance();
                 $adviceClass_handle = $adviceClass_class->getMethod("getData");

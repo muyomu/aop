@@ -7,6 +7,7 @@ use muyomu\aop\advice\Client;
 use muyomu\aop\advicetype\AfterAdvice;
 use muyomu\aop\advicetype\BeforeAdvice;
 use muyomu\aop\advicetype\BeforeCatchAdvice;
+use muyomu\aop\advicetype\Hystrix;
 use muyomu\aop\advicetype\ReturnedAdvice;
 use ReflectionClass;
 use ReflectionException;
@@ -29,6 +30,7 @@ class AopClient implements Client
         $afterAdvice = $method->getAttributes(AfterAdvice::class);
         $returnedAdvice = $method->getAttributes(ReturnedAdvice::class);
         $beforeCatchAdvice = $method->getAttributes(BeforeCatchAdvice::class);
+        $Hystrix = $method->getAttributes(Hystrix::class);
 
         if (!empty($beforeAdvice)){
             $advice = $beforeAdvice[0]->newInstance();
@@ -50,7 +52,16 @@ class AopClient implements Client
                 $adviceClass_handle = $adviceClass_class->getMethod("adviceHandle");
                 $adviceClass_handle->invoke($adviceClass_instance);
             }
-            throw $exception;
+            if(!empty($Hystrix)){
+                $advice = $Hystrix[0]->newInstance();
+                $adviceClass = $advice->getHystrixClassName();
+                $adviceClass_class = new ReflectionClass($adviceClass);
+                $adviceClass_instance = $adviceClass_class->newInstance();
+                $adviceClass_handle = $adviceClass_class->getMethod("getData");
+                return $adviceClass_handle->invoke($adviceClass_instance,$args);
+            }else{
+                throw $exception;
+            }
         }
 
         if (!empty($afterAdvice)){
