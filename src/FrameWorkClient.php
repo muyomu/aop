@@ -19,7 +19,7 @@ class FrameWorkClient implements FrameWork
     /**
      * @throws ReflectionException
      */
-    public function aopExecutor(ReflectionClass $class, mixed $instance, ReflectionMethod $method, mixed $args): mixed
+    public function aopExecutor(mixed $instance, ReflectionMethod $method, mixed $args): mixed
     {
         $beforeAdvice = $method->getAttributes(BeforeAdvice::class);
         $afterAdvice = $method->getAttributes(AfterAdvice::class);
@@ -54,8 +54,9 @@ class FrameWorkClient implements FrameWork
                 $adviceClass_instance = $adviceClass_class->newInstance();
                 $adviceClass_handle = $adviceClass_class->getMethod("getData");
                 return $adviceClass_handle->invoke($adviceClass_instance,$args);
+            }else{
+                throw $exception;
             }
-            throw $exception;
         }
 
         if (!empty($afterAdvice)){
