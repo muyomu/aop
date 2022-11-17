@@ -4,5 +4,5 @@ namespace muyomu\aop\advice;
 
 interface AfterAdvice
 {
-    public function adviceHandle(mixed $argv):void;
+    public function adviceHandle():void;
 }

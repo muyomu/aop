@@ -3,32 +3,29 @@
 namespace muyomu\aop;
 
 use Exception;
-use muyomu\aop\advice\Client;
+use muyomu\aop\advice\FrameWork;
 use muyomu\aop\advicetype\AfterAdvice;
 use muyomu\aop\advicetype\BeforeAdvice;
 use muyomu\aop\advicetype\BeforeCatchAdvice;
+use muyomu\aop\advicetype\Hystrix;
 use muyomu\aop\advicetype\ReturnedAdvice;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 
-class AopClient implements Client
+class FrameWorkClient implements FrameWork
 {
 
     /**
      * @throws ReflectionException
      */
-    public function aopExecutor(string $targetClassName, string $targetHandleName, ...$args): mixed
+    public function aopExecutor(ReflectionClass $class, mixed $instance, ReflectionMethod $method, mixed $args): mixed
     {
-        $class = new ReflectionClass($targetClassName);
-
-        $instance = $class->newInstance();
-
-        $method = $class->getMethod($targetHandleName);
-
         $beforeAdvice = $method->getAttributes(BeforeAdvice::class);
         $afterAdvice = $method->getAttributes(AfterAdvice::class);
         $returnedAdvice = $method->getAttributes(ReturnedAdvice::class);
         $beforeCatchAdvice = $method->getAttributes(BeforeCatchAdvice::class);
+        $Hystrix = $method->getAttributes(Hystrix::class);
 
         if (!empty($beforeAdvice)){
             $advice = $beforeAdvice[0]->newInstance();
@@ -36,7 +33,7 @@ class AopClient implements Client
             $adviceClass_class = new ReflectionClass($adviceClass);
             $adviceClass_instance = $adviceClass_class->newInstance();
             $adviceClass_handle = $adviceClass_class->getMethod("adviceHandle");
-            $adviceClass_handle->invoke($adviceClass_instance);
+            $adviceClass_handle->invoke($adviceClass_instance,$args);
         }
 
         try {
@@ -48,7 +45,15 @@ class AopClient implements Client
                 $adviceClass_class = new ReflectionClass($adviceClass);
                 $adviceClass_instance = $adviceClass_class->newInstance();
                 $adviceClass_handle = $adviceClass_class->getMethod("adviceHandle");
-                $adviceClass_handle->invoke($adviceClass_instance);
+                $adviceClass_handle->invoke($adviceClass_instance,$args);
+            }
+            if(!empty($Hystrix)){
+                $advice = $Hystrix[0]->newInstance();
+                $adviceClass = $advice->getAdviceClassName();
+                $adviceClass_class = new ReflectionClass($adviceClass);
+                $adviceClass_instance = $adviceClass_class->newInstance();
+                $adviceClass_handle = $adviceClass_class->getMethod("getData");
+                return $adviceClass_handle->invoke($adviceClass_instance,$args);
             }
             throw $exception;
         }
@@ -59,7 +64,7 @@ class AopClient implements Client
             $adviceClass_class = new ReflectionClass($adviceClass);
             $adviceClass_instance = $adviceClass_class->newInstance();
             $adviceClass_handle = $adviceClass_class->getMethod("adviceHandle");
-            $adviceClass_handle->invoke($adviceClass_instance);
+            $adviceClass_handle->invoke($adviceClass_instance,$args);
         }
 
         if (!empty($returnedAdvice)){
@@ -68,9 +73,8 @@ class AopClient implements Client
             $adviceClass_class = new ReflectionClass($adviceClass);
             $adviceClass_instance = $adviceClass_class->newInstance();
             $adviceClass_handle = $adviceClass_class->getMethod("adviceHandle");
-            $adviceClass_handle->invoke($adviceClass_instance);
+            $adviceClass_handle->invoke($adviceClass_instance,$args);
         }
-
         return $data;
     }
 }
