@@ -2,7 +2,6 @@
 
 namespace muyomu\aop\advice;
 
-use ReflectionClass;
 use ReflectionMethod;
 
 interface FrameWork
