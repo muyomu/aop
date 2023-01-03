@@ -15,7 +15,7 @@ class FrameWorkClient implements FrameWork
     /**
      * @throws ReflectionException
      */
-    public function aopExecutor(mixed $instance, ReflectionMethod $method, mixed $args): mixed
+    public function aopExecutor(object $instance, ReflectionMethod $method, mixed $args): mixed
     {
         $Hystrix = $method->getAttributes(Hystrix::class);
 
