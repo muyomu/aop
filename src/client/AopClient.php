@@ -1,6 +1,6 @@
 <?php
 
-namespace muyomu\aop\advice;
+namespace muyomu\aop\client;
 
 interface AopClient
 {
